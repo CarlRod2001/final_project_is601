@@ -399,6 +399,11 @@ class NthRoot(Calculation):
             if result < 0 and n % 2 == 0:
                 raise ValueError("Cannot take even root of negative number.")
             result = result ** (1 / n)
+
+        # Floating-point normalization
+        if abs(result - round(result)) < 1e-9:
+            result = round(result)
+
         return result
 
 class Modulus(Calculation):
