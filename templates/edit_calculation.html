@@ -294,6 +294,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         result = inputs.reduce((a, b, i) => i === 0 ? a : a / b, inputs[0]);
         break;
+      case 'exponentiation':
+        result = inputs.reduce((a, b, i) => i === 0 ? a : Math.pow(a, b), inputs[0]);
+        break;
+       // Reverse exponentiation: a^(1/b)^(1/c)
+      case 'nthroot':
+        if (inputs.some((value, index) => index > 0 && value === 0)) {
+          return 'Root cannot be zero';
+        }
+        result = inputs.reduce((a, b, i) => i === 0 ? a : Math.pow(a, 1 / b), inputs[0]);
+        break;
+      case 'modulus':
+        result = inputs.reduce((a, b) => a % b, inputs[0]);
+        if (inputs.some((value, index) => index > 0 && value === 0)) {
+          return 'Cannot modulus by zero';
+        }
+        result = inputs.reduce((a, b, i) => i === 0 ? a : a % b, inputs[0]);
+        break;
       default:
         return 'Unknown operation';
     }
@@ -329,6 +346,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         break;
       case 'division':
         operator = '÷';
+        break;
+      case 'exponentiation':
+        operator = '^';
+        break;
+      case 'nthroot':
+        operator = '√';
+        break;
+      case 'modulus':
+        operator = '%';
         break;
       default:
         operator = '?';
