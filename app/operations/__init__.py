@@ -4,14 +4,18 @@
 Module: operations.py
 
 This module contains basic arithmetic functions that perform addition, subtraction,
-multiplication, and division of two numbers. These functions are foundational for
-building more complex applications, such as calculators or financial tools.
+multiplication, division, exponentiation, nth root, and modulus of numbers. These
+functions are foundational for building more complex applications, such as
+calculators or financial tools.
 
 Functions:
 - add(a: Union[int, float], b: Union[int, float]) -> Union[int, float]: Returns the sum of a and b.
 - subtract(a: Union[int, float], b: Union[int, float]) -> Union[int, float]: Returns the difference when b is subtracted from a.
 - multiply(a: Union[int, float], b: Union[int, float]) -> Union[int, float]: Returns the product of a and b.
 - divide(a: Union[int, float], b: Union[int, float]) -> float: Returns the quotient when a is divided by b. Raises ValueError if b is zero.
+- exponentiate(a: Union[int, float], b: Union[int, float]) -> Union[int, float]: Returns a raised to the power of b.
+- nthroot(value: Union[int, float], n: Union[int, float]) -> float: Returns the nth root of value. Raises ValueError if n is zero or if attempting an even root of a negative number.
+- modulus(a: Union[int, float], b: Union[int, float]) -> Union[int, float]: Returns the remainder of a divided by b. Raises ValueError if b is zero.
 
 Usage:
 These functions can be imported and used in other modules or integrated into APIs
@@ -118,3 +122,47 @@ def divide(a: Number, b: Number) -> float:
     # Perform division of a by b and return the result as a float
     result = a / b
     return result
+
+def exponentiate(a: Number, b: Number) -> Number:
+    """
+    Raise a to the power of b.
+    
+    Example:
+    >>> exponentiate(2, 3)
+    8
+    >>> exponentiate(4, 0.5)
+    2.0
+    """
+    return a ** b
+
+def nthroot(value: Number, n: Number) -> float:
+    """
+    Compute the nth root of value: value^(1/n).
+    
+    Raises ValueError for degree zero or even root of negative numbers.
+    
+    Example:
+    >>> nthroot(64, 2)
+    8.0
+    >>> nthroot(4096, 2)
+    64.0
+    """
+    if n == 0:
+        raise ValueError("Cannot take root with degree zero.")
+    if value < 0 and n % 2 == 0:
+        raise ValueError("Cannot take even root of negative number.")
+    return value ** (1 / n)
+
+def modulus(a: Number, b: Number) -> Number:
+    """
+    Return the modulus (remainder) of a divided by b.
+    
+    Raises ValueError if b is zero.
+    
+    Example:
+    >>> modulus(10, 3)
+    1
+    """
+    if b == 0:
+        raise ValueError("Cannot take modulus with zero.")
+    return a % b

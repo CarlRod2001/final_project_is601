@@ -12,6 +12,8 @@ It demonstrates several advanced patterns:
 
 These models are designed for a calculator application that supports
 basic mathematical operations: addition, subtraction, multiplication, and division.
+
+New mathematical operations have been added, including exponentiation, nth root, and modulus.
 """
 
 from datetime import datetime
@@ -178,6 +180,9 @@ class AbstractCalculation:
             'subtraction': Subtraction,
             'multiplication': Multiplication,
             'division': Division,
+            'exponentiation': Exponentiation,
+            'nthroot': NthRoot,
+            'modulus': Modulus,
         }
         calculation_class = calculation_classes.get(calculation_type.lower())
         if not calculation_class:
@@ -353,4 +358,64 @@ class Division(Calculation):
             if value == 0:
                 raise ValueError("Cannot divide by zero.")
             result /= value
+        return result
+
+class Exponentiation(Calculation):
+    """
+    Exponentiation calculation subclass.
+    
+    Raises numbers sequentially: [a, b, c] -> a^(b^c)
+    """
+    __mapper_args__ = {"polymorphic_identity": "exponentiation"}
+
+    def get_result(self) -> float:
+        if not isinstance(self.inputs, list):
+            raise ValueError("Inputs must be a list of numbers.")
+        if len(self.inputs) < 2:
+            raise ValueError("Exponentiation requires at least two inputs.")
+        result = self.inputs[-1]
+        for value in reversed(self.inputs[:-1]):
+            result = value ** result
+        return result
+
+class NthRoot(Calculation):
+    """
+    NthRoot calculation subclass.
+    
+    Computes sequential roots: [value, n1, n2, ...] -> value^(1/n1)^(1/n2)...
+    """
+    __mapper_args__ = {"polymorphic_identity": "nthroot"}
+
+    def get_result(self) -> float:
+        if not isinstance(self.inputs, list):
+            raise ValueError("Inputs must be a list of numbers.")
+        if len(self.inputs) < 2:
+            raise ValueError("NthRoot requires at least two inputs.")
+        result = self.inputs[0]
+        for n in self.inputs[1:]:
+            if n == 0:
+                raise ValueError("Cannot take root with degree zero.")
+            if result < 0 and n % 2 == 0:
+                raise ValueError("Cannot take even root of negative number.")
+            result = result ** (1 / n)
+        return result
+
+class Modulus(Calculation):
+    """
+    Modulus calculation subclass.
+    
+    Computes sequential modulus: [a, b, c] -> ((a % b) % c)...
+    """
+    __mapper_args__ = {"polymorphic_identity": "modulus"}
+
+    def get_result(self) -> float:
+        if not isinstance(self.inputs, list):
+            raise ValueError("Inputs must be a list of numbers.")
+        if len(self.inputs) < 2:
+            raise ValueError("Modulus requires at least two inputs.")
+        result = self.inputs[0]
+        for value in self.inputs[1:]:
+            if value == 0:
+                raise ValueError("Cannot take modulus with zero.")
+            result = result % value
         return result

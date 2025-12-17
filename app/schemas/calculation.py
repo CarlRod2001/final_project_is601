@@ -36,6 +36,9 @@ class CalculationType(str, Enum):
     SUBTRACTION = "subtraction"
     MULTIPLICATION = "multiplication"
     DIVISION = "division"
+    EXPONENTIATION = "exponentiation"
+    NTHROOT = "nthroot"
+    MODULUS = "modulus"
 
 class CalculationBase(BaseModel):
     """
@@ -49,7 +52,7 @@ class CalculationBase(BaseModel):
     """
     type: CalculationType = Field(
         ...,  # The ... means this field is required
-        description="Type of calculation (addition, subtraction, multiplication, division)",
+        description="Type of calculation (addition, subtraction, multiplication, division, exponentiation, nthroot, modulus)",
         example="addition"
     )
     inputs: List[float] = Field(
@@ -130,6 +133,12 @@ class CalculationBase(BaseModel):
             # Prevent division by zero (skip the first value as numerator)
             if any(x == 0 for x in self.inputs[1:]):
                 raise ValueError("Cannot divide by zero")
+        if self.type == CalculationType.MODULUS:
+            if any(x == 0 for x in self.inputs[1:]):
+                raise ValueError("Cannot modulo by zero")
+        if self.type == CalculationType.NTHROOT:
+            if self.inputs[1:].count(0) > 0:
+                raise ValueError("Cannot take zero as a root exponent")
         return self
 
     model_config = ConfigDict(
@@ -140,7 +149,10 @@ class CalculationBase(BaseModel):
         json_schema_extra={
             "examples": [
                 {"type": "addition", "inputs": [10.5, 3, 2]},
-                {"type": "division", "inputs": [100, 2]}
+                {"type": "division", "inputs": [100, 2]},
+                {"type": "exponentiation", "inputs": [4, 3, 2]},
+                {"type": "nthroot", "inputs": [4096, 2, 3]},
+                {"type": "modulus", "inputs": [10, 3]}
             ]
         }
     )
