@@ -7,6 +7,9 @@ from app.models.calculation import (
     Subtraction,
     Multiplication,
     Division,
+    Exponentiation,
+    NthRoot,
+    Modulus,
 )
 
 # Helper function to create a dummy user_id for testing.
@@ -59,6 +62,24 @@ def test_division_by_zero():
     division = Division(user_id=dummy_user_id(), inputs=inputs)
     with pytest.raises(ValueError, match="Cannot divide by zero."):
         division.get_result()
+
+def test_exponentiation_get_result():
+    inputs = [4, 3, 2]  # Left-to-right: (4^3)^2 = 4096
+    exp_calc = Exponentiation(user_id=dummy_user_id(), inputs=inputs)
+    result = exp_calc.get_result()
+    assert result == 4096, f"Expected 4096, got {result}"
+
+def test_nthroot_get_result():
+    inputs = [4096, 2, 3]  # Sequential roots: ((4096^(1/2))^(1/3)) ≈ 4
+    root_calc = NthRoot(user_id=dummy_user_id(), inputs=inputs)
+    result = root_calc.get_result()
+    assert abs(result - 4) < 1e-9, f"Expected 4, got {result}"
+
+def test_modulus_get_result():
+    inputs = [27, 6, 4]  # 27 % 6 % 4 = 3
+    mod_calc = Modulus(user_id=dummy_user_id(), inputs=inputs)
+    result = mod_calc.get_result()
+    assert result == 3, f"Expected 3, got {result}"
 
 def test_calculation_factory_addition():
     """
@@ -116,13 +137,43 @@ def test_calculation_factory_division():
     assert isinstance(calc, Division), "Factory did not return a Division instance."
     assert calc.get_result() == 10, "Incorrect division result."
 
+def test_calculation_factory_exponentiation():
+    inputs = [2, 3, 2]  # (2^3)^2 = 64
+    calc = Calculation.create(
+        calculation_type='exponentiation',
+        user_id=dummy_user_id(),
+        inputs=inputs,
+    )
+    assert isinstance(calc, Exponentiation)
+    assert calc.get_result() == 64
+
+def test_calculation_factory_nthroot():
+    inputs = [64, 2, 3]  # ((64^(1/2))^(1/3)) ≈ 2
+    calc = Calculation.create(
+        calculation_type='nthroot',
+        user_id=dummy_user_id(),
+        inputs=inputs,
+    )
+    assert isinstance(calc, NthRoot)
+    assert abs(calc.get_result() - 2) < 1e-7
+
+def test_calculation_factory_modulus():
+    inputs = [20, 7, 3]  # 20 % 7 % 3 = 6 % 3 = 0
+    calc = Calculation.create(
+        calculation_type='modulus',
+        user_id=dummy_user_id(),
+        inputs=inputs,
+    )
+    assert isinstance(calc, Modulus)
+    assert calc.get_result() == 0
+
 def test_calculation_factory_invalid_type():
     """
     Test that Calculation.create raises a ValueError for an unsupported calculation type.
     """
     with pytest.raises(ValueError, match="Unsupported calculation type"):
         Calculation.create(
-            calculation_type='modulus',  # unsupported type
+            calculation_type='absolutevalue',  # unsupported type
             user_id=dummy_user_id(),
             inputs=[10, 3],
         )
@@ -150,3 +201,64 @@ def test_invalid_inputs_for_division():
     division = Division(user_id=dummy_user_id(), inputs=[10])
     with pytest.raises(ValueError, match="Inputs must be a list with at least two numbers."):
         division.get_result()
+
+def test_invalid_inputs_for_exponentiation():
+    """
+    Test that providing non-list inputs or fewer than two numbers
+    to Exponentiation.get_result raises a ValueError.
+    """
+    # Non-list input
+    exp_calc = Exponentiation(user_id=dummy_user_id(), inputs="not-a-list")
+    with pytest.raises(ValueError, match="Inputs must be a list of numbers."):
+        exp_calc.get_result()
+
+    # Less than two numbers
+    exp_calc = Exponentiation(user_id=dummy_user_id(), inputs=[2])
+    with pytest.raises(ValueError, match="Exponentiation requires at least two inputs."):
+        exp_calc.get_result()
+
+def test_invalid_inputs_for_nthroot():
+    """
+    Test that providing non-list inputs, fewer than two numbers,
+    zero roots, or even root of negative numbers raises a ValueError.
+    """
+    # Non-list input
+    root_calc = NthRoot(user_id=dummy_user_id(), inputs="not-a-list")
+    with pytest.raises(ValueError, match="Inputs must be a list of numbers."):
+        root_calc.get_result()
+
+    # Less than two numbers
+    root_calc = NthRoot(user_id=dummy_user_id(), inputs=[16])
+    with pytest.raises(ValueError, match="NthRoot requires at least two inputs."):
+        root_calc.get_result()
+
+    # Zero as root
+    root_calc = NthRoot(user_id=dummy_user_id(), inputs=[16, 0])
+    with pytest.raises(ValueError, match="Cannot take root with degree zero."):
+        root_calc.get_result()
+
+    # Even root of negative number
+    root_calc = NthRoot(user_id=dummy_user_id(), inputs=[-16, 2])
+    with pytest.raises(ValueError, match="Cannot take even root of negative number."):
+        root_calc.get_result()
+
+def test_invalid_inputs_for_modulus():
+    """
+    Test that providing non-list inputs, fewer than two numbers,
+    or zero as a divisor raises a ValueError for Modulus.
+    """
+    # Non-list input
+    mod_calc = Modulus(user_id=dummy_user_id(), inputs="not-a-list")
+    with pytest.raises(ValueError, match="Inputs must be a list of numbers."):
+        mod_calc.get_result()
+
+    # Less than two numbers
+    mod_calc = Modulus(user_id=dummy_user_id(), inputs=[10])
+    with pytest.raises(ValueError, match="Modulus requires at least two inputs."):
+        mod_calc.get_result()
+
+    # Zero as divisor
+    mod_calc = Modulus(user_id=dummy_user_id(), inputs=[10, 0])
+    with pytest.raises(ValueError, match="Cannot take modulus with zero."):
+        mod_calc.get_result()
+
