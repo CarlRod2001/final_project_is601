@@ -364,7 +364,7 @@ class Exponentiation(Calculation):
     """
     Exponentiation calculation subclass.
     
-    Raises numbers sequentially: [a, b, c] -> a^(b^c)
+    Raises numbers left-to-right: [a, b, c] -> (a^b)^c
     """
     __mapper_args__ = {"polymorphic_identity": "exponentiation"}
 
@@ -373,10 +373,11 @@ class Exponentiation(Calculation):
             raise ValueError("Inputs must be a list of numbers.")
         if len(self.inputs) < 2:
             raise ValueError("Exponentiation requires at least two inputs.")
-        result = self.inputs[-1]
-        for value in reversed(self.inputs[:-1]):
-            result = value ** result
+        result = self.inputs[0]
+        for value in self.inputs[1:]:
+            result = result ** value
         return result
+
 
 class NthRoot(Calculation):
     """
