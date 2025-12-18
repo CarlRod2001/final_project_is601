@@ -228,6 +228,72 @@ def test_create_calculation_division(client):
     # Expected result: 100 / 2 / 5 = 10
     assert "result" in data and data["result"] == 10, f"Expected result 10, got {data.get('result')}"
 
+def test_create_calculation_exponentiation(client):
+    user_data = {
+        "first_name": "Calc",
+        "last_name": "Power",
+        "email": f"calc.pow{uuid4()}@example.com",
+        "username": f"calc_pow_{uuid4()}",
+        "password": "SecurePass123!",
+        "confirm_password": "SecurePass123!"
+    }
+    token_data = register_and_login(client, user_data)
+    headers = {"Authorization": f"Bearer {token_data['access_token']}"}
+
+    payload = {
+        "type": "exponentiation",
+        "inputs": [4, 3, 2],  # (4^3)^2 = 4096
+        "user_id": "ignored"
+    }
+
+    response = client.post("/calculations", json=payload, headers=headers)
+    assert response.status_code == 201
+    assert response.json()["result"] == 4096
+
+def test_create_calculation_nthroot(client):
+    user_data = {
+        "first_name": "Calc",
+        "last_name": "Root",
+        "email": f"calc.root{uuid4()}@example.com",
+        "username": f"calc_root_{uuid4()}",
+        "password": "SecurePass123!",
+        "confirm_password": "SecurePass123!"
+    }
+    token_data = register_and_login(client, user_data)
+    headers = {"Authorization": f"Bearer {token_data['access_token']}"}
+
+    payload = {
+        "type": "nthroot",
+        "inputs": [4096, 2, 3],  # sqrt → cbrt → 4
+        "user_id": "ignored"
+    }
+
+    response = client.post("/calculations", json=payload, headers=headers)
+    assert response.status_code == 201
+    assert response.json()["result"] == 4
+
+def test_create_calculation_modulus(client):
+    user_data = {
+        "first_name": "Calc",
+        "last_name": "Modulo",
+        "email": f"calc.mod{uuid4()}@example.com",
+        "username": f"calc_mod_{uuid4()}",
+        "password": "SecurePass123!",
+        "confirm_password": "SecurePass123!"
+    }
+    token_data = register_and_login(client, user_data)
+    headers = {"Authorization": f"Bearer {token_data['access_token']}"}
+
+    payload = {
+        "type": "modulus",
+        "inputs": [20, 7, 3],  # (20 % 7) % 3 = 0
+        "user_id": "ignored"
+    }
+
+    response = client.post("/calculations", json=payload, headers=headers)
+    assert response.status_code == 201
+    assert response.json()["result"] == 0
+
 def test_list_get_update_delete_calculation(client):
     user_data = {
         "first_name": "Calc",
@@ -317,3 +383,18 @@ def test_model_division():
     with pytest.raises(ValueError):
         calc_zero = Calculation.create("division", dummy_user_id, [100, 0])
         calc_zero.get_result()
+
+def test_model_exponentiation():
+    dummy_user_id = uuid4()
+    calc = Calculation.create("exponentiation", dummy_user_id, [4, 3, 2])
+    assert calc.get_result() == 4096
+
+def test_model_nthroot():
+    dummy_user_id = uuid4()
+    calc = Calculation.create("nthroot", dummy_user_id, [4096, 2, 3])
+    assert calc.get_result() == 4
+
+def test_model_modulus():
+    dummy_user_id = uuid4()
+    calc = Calculation.create("modulus", dummy_user_id, [20, 7, 3])
+    assert calc.get_result() == 0

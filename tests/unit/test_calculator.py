@@ -2,7 +2,7 @@
 
 import pytest  # Import the pytest framework for writing and running tests
 from typing import Union  # Import Union for type hinting multiple possible types
-from app.operations import add, subtract, multiply, divide  # Import the calculator functions from the operations module
+from app.operations import add, subtract, multiply, divide, exponentiate, nthroot, modulus  # Import the calculator functions from the operations module
 
 # Define a type alias for numbers that can be either int or float
 Number = Union[int, float]
@@ -232,3 +232,68 @@ def test_divide_by_zero() -> None:
     # Assert that the exception message contains the expected error message
     assert "Cannot divide by zero!" in str(excinfo.value), \
         f"Expected error message 'Cannot divide by zero!', but got '{excinfo.value}'"
+    
+# Additional tests for exponentiate, nthroot, and modulus can be added similarly.
+# ---------------------------------------------
+# Unit Tests for the 'exponentiate' Function
+# ---------------------------------------------
+
+@pytest.mark.parametrize(
+    "base, exp, expected",
+    [
+        (2, 3, 8),
+        (4, 2, 16),
+        (9, 0.5, 3),
+        (5, 0, 1),
+        (2.5, 2, 6.25),
+    ],
+)
+def test_exponentiate(base: Number, exp: Number, expected: Number) -> None:
+    result = exponentiate(base, exp)
+    assert result == expected
+
+# ---------------------------------------------
+# Unit Tests for the 'nthroot' Function
+# ---------------------------------------------
+
+@pytest.mark.parametrize(
+    "value, n, expected",
+    [
+        (64, 2, 8),
+        (27, 3, 3),
+        (16, 4, 2),
+        (4096, 2, 64),
+    ],
+)
+def test_nthroot(value: Number, n: Number, expected: Number) -> None:
+    result = nthroot(value, n)
+    assert result == expected
+
+def test_nthroot_zero_degree():
+    with pytest.raises(ValueError, match="degree zero"):
+        nthroot(64, 0)
+
+def test_nthroot_even_root_of_negative():
+    with pytest.raises(ValueError, match="even root of negative"):
+        nthroot(-16, 2)
+
+# ---------------------------------------------
+# Unit Tests for the 'modulus' Function
+# ---------------------------------------------
+
+@pytest.mark.parametrize(
+    "a, b, expected",
+    [
+        (10, 3, 1),
+        (20, 7, 6),
+        (9, 3, 0),
+        (-10, 3, 2),
+    ],
+)
+def test_modulus(a: Number, b: Number, expected: Number) -> None:
+    result = modulus(a, b)
+    assert result == expected
+
+def test_modulus_by_zero():
+    with pytest.raises(ValueError, match="Cannot take modulus with zero."):
+        modulus(10, 0)
