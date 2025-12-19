@@ -3,32 +3,45 @@
 **Running the Application**
 
 Clone the repository and navigate to the project directory:
-   git clone git@github.com:CarlRod2001/final_project_is601.git
-   cd final_project_is601
+
+```bash
+git clone git@github.com:CarlRod2001/final_project_is601.git
+cd final_project_is601
+```
 
 Create and activate a virtual environment:
-   python -m venv venv
-   source venv/binactivate
-   venv\Scripts\activate
 
+```bash
+python -m venv venv
+source venv/binactivate
+venv\Scripts\activate
+```
 Install dependencies:
-   pip install -r requirements.txt
-   
+```bash
+pip install -r requirements.txt
+```
+
 Build and start the application using Docker:
-   docker compose up --build
+```bash
+docker compose up --build
+```
    
 Open a browser and navigate to:
-   http://localhost:8000
-
+```bash
+http://localhost:8000
+```
 
 **Running Tests Locally**
 
 Starting the Application Services:
-   docker compose up -d
+```bash
+docker compose up -d
+```
 
 Run all unit and integration tests:
-   pytest
-
+```bash
+pytest
+```
 
 **Docker Image**
 
