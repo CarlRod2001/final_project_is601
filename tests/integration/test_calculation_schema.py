@@ -97,3 +97,39 @@ def test_calculation_response_valid():
     assert calc_response.type == "subtraction"
     assert calc_response.inputs == [20, 5]
     assert calc_response.result == 15.5
+
+@pytest.mark.parametrize(
+    "calc_type, inputs",
+    [
+        ("exponentiation", [4, 3, 2]),
+        ("nthroot", [4096, 2, 3]),
+        ("modulus", [20, 7, 3]),
+    ],
+)
+def test_calculation_create_new_types(calc_type, inputs):
+    data = {
+        "type": calc_type,
+        "inputs": inputs,
+        "user_id": uuid4(),
+    }
+    calc = CalculationCreate(**data)
+    assert calc.type == calc_type
+    assert calc.inputs == inputs
+
+def test_modulus_schema_rejects_zero_divisor():
+    data = {
+        "type": "modulus",
+        "inputs": [10, 0],
+        "user_id": uuid4(),
+    }
+    with pytest.raises(ValidationError):
+        CalculationCreate(**data)
+        
+def test_nthroot_schema_rejects_zero_root():
+    data = {
+        "type": "nthroot",
+        "inputs": [64, 0],
+        "user_id": uuid4(),
+    }
+    with pytest.raises(ValidationError):
+        CalculationCreate(**data)
